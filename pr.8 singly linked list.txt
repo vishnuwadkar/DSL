@@ -1,0 +1,153 @@
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+// Structure to represent a club member
+struct ClubMember {
+    int prn;
+    char name[50];
+    ClubMember* next;
+};
+
+// Function to add a new member at the end of the list
+ClubMember* addMember(ClubMember* head, int prn, const char* name) {
+    ClubMember* newMember = new ClubMember;
+    newMember->prn = prn;
+    strncpy(newMember->name, name, sizeof(newMember->name));
+    newMember->next = nullptr;
+
+    if (head == nullptr) {
+        return newMember;
+    }
+
+    ClubMember* current = head;
+    while (current->next != nullptr) {
+        current = current->next;
+    }
+
+    current->next = newMember;
+    return head;
+}
+
+// Function to delete a member by PRN
+ClubMember* deleteMember(ClubMember* head, int prn) {
+    if (head == nullptr) {
+        return nullptr;
+    }
+
+    if (head->prn == prn) {
+        ClubMember* newHead = head->next;
+        delete head;
+        return newHead;
+    }
+
+    ClubMember* current = head;
+    while (current->next != nullptr && current->next->prn != prn) {
+        current = current->next;
+    }
+
+    if (current->next != nullptr) {
+        ClubMember* temp = current->next;
+        current->next = current->next->next;
+        delete temp;
+    }
+
+    return head;
+}
+
+// Function to compute the total number of members
+int countMembers(ClubMember* head) {
+    int count = 0;
+    ClubMember* current = head;
+
+    while (current != nullptr) {
+        count++;
+        current = current->next;
+    }
+
+    return count;
+}
+
+// Function to display members
+void displayMembers(ClubMember* head) {
+    ClubMember* current = head;
+
+    cout << "Club Members:\n";
+    while (current != nullptr) {
+        cout << "PRN: " << current->prn << ", Name: " << current->name << "\n";
+        current = current->next;
+    }
+}
+
+// Function to display list in reverse order using recursion
+void displayReverse(ClubMember* head) {
+    if (head == nullptr) {
+        return;
+    }
+
+    displayReverse(head->next);
+    cout << "PRN: " << head->prn << ", Name: " << head->name << "\n";
+}
+
+// Function to concatenate two lists
+ClubMember* concatenateLists(ClubMember* list1, ClubMember* list2) {
+    if (list1 == nullptr) {
+        return list2;
+    }
+
+    ClubMember* current = list1;
+    while (current->next != nullptr) {
+        current = current->next;
+    }
+
+    current->next = list2;
+    return list1;
+}
+
+int main() {
+    // Division A members
+    ClubMember* divisionA = nullptr;
+    divisionA = addMember(divisionA, 2022001, "John Doe");
+    divisionA = addMember(divisionA, 2022002, "Jane Smith");
+    divisionA = addMember(divisionA, 2022003, "Bob Johnson");
+
+    // Division B members
+    ClubMember* divisionB = nullptr;
+    divisionB = addMember(divisionB, 2023001, "Alice Brown");
+    divisionB = addMember(divisionB, 2023002, "Charlie Wilson");
+
+    // Display members in both divisions
+    cout << "Division A Members:\n";
+    displayMembers(divisionA);
+
+    cout << "\nDivision B Members:\n";
+    displayMembers(divisionB);
+
+    // Concatenate two lists
+    ClubMember* combinedList = concatenateLists(divisionA, divisionB);
+
+    // Display combined list
+    cout << "\nCombined List:\n";
+    displayMembers(combinedList);
+
+    // Add, delete, and display members
+    combinedList = addMember(combinedList, 2024001, "David Lee");
+    combinedList = deleteMember(combinedList, 2022002);
+
+    cout << "\nUpdated List:\n";
+    displayMembers(combinedList);
+
+    // Display list in reverse order using recursion
+    cout << "\nList in Reverse Order:\n";
+    displayReverse(combinedList);
+
+    // Clean up allocated memory
+    while (combinedList != nullptr) {
+        ClubMember* temp = combinedList;
+        combinedList = combinedList->next;
+        delete temp;
+    }
+
+    return 0;
+}

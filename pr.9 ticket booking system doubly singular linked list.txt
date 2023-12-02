@@ -1,0 +1,142 @@
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+
+using namespace std;
+
+// Structure to represent a seat in the theater
+struct Seat {
+    int row, seatNumber;
+    bool isBooked;
+    Seat* next;
+    Seat* prev;
+};
+
+// Function to initialize a row with seats
+Seat* initializeRow(int row, int numSeats) {
+    Seat* head = nullptr;
+    Seat* current = nullptr;
+
+    for (int seatNumber = 1; seatNumber <= numSeats; ++seatNumber) {
+        Seat* newSeat = new Seat;
+        newSeat->row = row;
+        newSeat->seatNumber = seatNumber;
+        newSeat->isBooked = false;
+        newSeat->next = nullptr;
+        newSeat->prev = nullptr;
+
+        if (head == nullptr) {
+            head = newSeat;
+            current = newSeat;
+        } else {
+            current->next = newSeat;
+            newSeat->prev = current;
+            current = newSeat;
+        }
+    }
+
+    // Make the list doubly circular
+    if (current != nullptr) {
+        current->next = head;
+        head->prev = current;
+    }
+
+    return head;
+}
+
+// Function to display available seats in a row
+void displayAvailableSeats(Seat* head) {
+    Seat* current = head;
+
+    cout << "Available seats in Row " << current->row << ":\n";
+    do {
+        if (!current->isBooked) {
+            cout << "Seat " << current->seatNumber << " ";
+        }
+        current = current->next;
+    } while (current != head);
+
+    cout << "\n";
+}
+
+// Function to book a seat
+void bookSeat(Seat* head, int seatNumber) {
+    Seat* current = head;
+
+    do {
+        if (current->seatNumber == seatNumber && !current->isBooked) {
+            current->isBooked = true;
+            cout << "Seat " << seatNumber << " booked successfully!\n";
+            return;
+        }
+        current = current->next;
+    } while (current != head);
+
+    cout << "Seat " << seatNumber << " is not available or already booked.\n";
+}
+
+// Function to cancel a booking
+void cancelBooking(Seat* head, int seatNumber) {
+    Seat* current = head;
+
+    do {
+        if (current->seatNumber == seatNumber && current->isBooked) {
+            current->isBooked = false;
+            cout << "Booking for Seat " << seatNumber << " canceled successfully!\n";
+            return;
+        }
+        current = current->next;
+    } while (current != head);
+
+    cout << "No booking found for Seat " << seatNumber << ".\n";
+}
+
+int main() {
+    const int numRows = 10;
+    const int numSeatsPerRow = 7;
+
+    // Array to store pointers to each row
+    Seat* rows[numRows];
+
+    // Initialize each row with seats
+    for (int i = 0; i < numRows; ++i) {
+        rows[i] = initializeRow(i + 1, numSeatsPerRow);
+    }
+
+    // Display available seats in each row
+    for (int i = 0; i < numRows; ++i) {
+        displayAvailableSeats(rows[i]);
+    }
+
+    // Book some random seats
+    bookSeat(rows[2], 3);
+    bookSeat(rows[5], 5);
+    bookSeat(rows[8], 2);
+
+    // Display available seats after bookings
+    for (int i = 0; i < numRows; ++i) {
+        displayAvailableSeats(rows[i]);
+    }
+
+    // Cancel a booking
+    cancelBooking(rows[5], 5);
+
+    // Display available seats after cancellation
+    for (int i = 0; i < numRows; ++i) {
+        displayAvailableSeats(rows[i]);
+    }
+
+    // Clean up allocated memory
+    for (int i = 0; i < numRows; ++i) {
+        Seat* current = rows[i];
+        Seat* nextSeat;
+
+        do {
+            nextSeat = current->next;
+            delete current;
+            current = nextSeat;
+        } while (current != rows[i]);
+    }
+
+    return 0;
+}

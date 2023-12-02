@@ -1,0 +1,25 @@
+def process_transactions():
+    balance = 0
+    while True:
+        transaction = input("Enter transaction (D/W amount or 'q' to quit): ").strip()
+        if transaction == 'q':
+            break
+        parts = transaction.split()
+        if len(parts) != 2:
+            print("Invalid transaction format. Use 'D/W amount'.")
+            continue
+        action, amount = parts
+        amount = int(amount)
+        if action == 'D':
+            balance += amount
+        elif action == 'W':
+            if balance >= amount:
+                balance -= amount
+            else:
+                print("Withdrawal not allowed. Insufficient balance.")
+        else:
+            print("Invalid transaction type. Use 'D' for deposit or 'W' for withdrawal.")
+    return balance
+
+net_amount = process_transactions()
+print("Net amount:", net_amount)

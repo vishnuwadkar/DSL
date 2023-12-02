@@ -1,0 +1,106 @@
+#include <iostream>
+#include <stack>
+#include <cctype> // For isdigit() function
+
+using namespace std;
+
+int performOperation(char operation, int operand1, int operand2) {
+    switch (operation) {
+        case '+':
+            return operand1 + operand2;
+        case '-':
+            return operand1 - operand2;
+        case '*':
+            return operand1 * operand2;
+        case '/':
+            if (operand2 != 0)
+                return operand1 / operand2;
+            else {
+                cerr << "Error: Division by zero\n";
+                exit(1);
+            }
+        default:
+            cerr << "Error: Invalid operator\n";
+            exit(1);
+    }
+}
+
+int getOperatorPrecedence(char op) {
+    switch (op) {
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        default:
+            return 0;
+    }
+}
+
+string infixToPostfix(const string& infix) {
+    stack<char> operatorStack;
+    string postfix;
+
+    for (char ch : infix) {
+        if (isalnum(ch)) {
+            postfix += ch;
+        } else if (ch == '(') {
+            operatorStack.push(ch);
+        } else if (ch == ')') {
+            while (!operatorStack.empty() && operatorStack.top() != '(') {
+                postfix += operatorStack.top();
+                operatorStack.pop();
+            }
+            operatorStack.pop(); // Remove '(' from stack
+        } else {
+            while (!operatorStack.empty() && getOperatorPrecedence(operatorStack.top()) >= getOperatorPrecedence(ch)) {
+                postfix += operatorStack.top();
+                operatorStack.pop();
+            }
+            operatorStack.push(ch);
+        }
+    }
+
+    while (!operatorStack.empty()) {
+        postfix += operatorStack.top();
+        operatorStack.pop();
+    }
+
+    return postfix;
+}
+
+int evaluatePostfix(const string& postfix) {
+    stack<int> operandStack;
+
+    for (char ch : postfix) {
+        if (isalnum(ch)) {
+            operandStack.push(ch - '0'); // Convert char to int
+        } else {
+            int operand2 = operandStack.top();
+            operandStack.pop();
+            int operand1 = operandStack.top();
+            operandStack.pop();
+
+            int result = performOperation(ch, operand1, operand2);
+            operandStack.push(result);
+        }
+    }
+
+    return operandStack.top();
+}
+
+int main() {
+    string infixExpression, postfixExpression;
+
+    cout << "Enter the infix expression: ";
+    getline(cin, infixExpression);
+
+    postfixExpression = infixToPostfix(infixExpression);
+    cout << "Postfix expression: " << postfixExpression << endl;
+
+    int result = evaluatePostfix(postfixExpression);
+    cout << "Result after evaluation: " << result << endl;
+
+    return 0;
+}

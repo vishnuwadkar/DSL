@@ -1,0 +1,165 @@
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+// Structure to represent a time slot
+struct TimeSlot {
+    int startHour, startMinute;
+    int endHour, endMinute;
+    bool isBooked;
+    TimeSlot* next;
+};
+
+// Function to display free slots
+void displayFreeSlots(TimeSlot* schedule) {
+    TimeSlot* current = schedule;
+
+    cout << "Free Slots:\n";
+    while (current != nullptr) {
+        if (!current->isBooked) {
+            cout << setw(2) << setfill('0') << current->startHour << ":"
+                 << setw(2) << setfill('0') << current->startMinute << " - "
+                 << setw(2) << setfill('0') << current->endHour << ":"
+                 << setw(2) << setfill('0') << current->endMinute << "\n";
+        }
+        current = current->next;
+    }
+}
+
+// Function to book appointment
+void bookAppointment(TimeSlot* schedule, int startHour, int startMinute, int endHour, int endMinute) {
+    TimeSlot* current = schedule;
+
+    while (current != nullptr) {
+        if (!current->isBooked &&
+            current->startHour <= startHour && current->startMinute <= startMinute &&
+            current->endHour >= endHour && current->endMinute >= endMinute) {
+            current->isBooked = true;
+            cout << "Appointment booked successfully!\n";
+            return;
+        }
+        current = current->next;
+    }
+
+    cout << "Appointment slot not available.\n";
+}
+
+// Function to cancel appointment
+void cancelAppointment(TimeSlot* schedule, int startHour, int startMinute) {
+    TimeSlot* current = schedule;
+
+    while (current != nullptr) {
+        if (current->isBooked &&
+            current->startHour == startHour && current->startMinute == startMinute) {
+            current->isBooked = false;
+            cout << "Appointment canceled successfully!\n";
+            return;
+        }
+        current = current->next;
+    }
+
+    cout << "No booked appointment found at the specified time.\n";
+}
+
+// Function to sort list based on time
+void sortList(TimeSlot* &schedule) {
+    if (schedule == nullptr || schedule->next == nullptr) {
+        return;
+    }
+
+    TimeSlot* sorted = nullptr;
+
+    while (schedule != nullptr) {
+        TimeSlot* current = schedule;
+        schedule = schedule->next;
+
+        if (sorted == nullptr || sorted->startHour > current->startHour ||
+            (sorted->startHour == current->startHour && sorted->startMinute > current->startMinute)) {
+            current->next = sorted;
+            sorted = current;
+        } else {
+            TimeSlot* temp = sorted;
+            while (temp->next != nullptr &&
+                   (temp->next->startHour < current->startHour ||
+                    (temp->next->startHour == current->startHour && temp->next->startMinute < current->startMinute))) {
+                temp = temp->next;
+            }
+            current->next = temp->next;
+            temp->next = current;
+        }
+    }
+
+    schedule = sorted;
+}
+
+// Function to display schedule
+void displaySchedule(TimeSlot* schedule) {
+    TimeSlot* current = schedule;
+
+    cout << "Schedule:\n";
+    while (current != nullptr) {
+        cout << setw(2) << setfill('0') << current->startHour << ":"
+             << setw(2) << setfill('0') << current->startMinute << " - "
+             << setw(2) << setfill('0') << current->endHour << ":"
+             << setw(2) << setfill('0') << current->endMinute;
+        if (current->isBooked) {
+            cout << " (Booked)";
+        }
+        cout << "\n";
+        current = current->next;
+    }
+}
+
+int main() {
+    // Initialize schedule with random time slots
+    srand(time(0));
+    const int numSlots = 8;
+    TimeSlot* schedule = nullptr;
+
+    for (int i = 0; i < numSlots; ++i) {
+        TimeSlot* slot = new TimeSlot;
+        slot->startHour = rand() % 24;
+        slot->startMinute = rand() % 60;
+        slot->endHour = slot->startHour + rand() % 3 + 1;  // Random duration between 1 and 3 hours
+        slot->endMinute = rand() % 60;
+        slot->isBooked = false;
+        slot->next = schedule;
+        schedule = slot;
+    }
+
+    // Display initial schedule
+    displaySchedule(schedule);
+
+    // Display free slots
+    displayFreeSlots(schedule);
+
+    // Book appointment
+    bookAppointment(schedule, 10, 0, 12, 0);
+
+    // Display updated schedule
+    displaySchedule(schedule);
+
+    // Cancel appointment
+    cancelAppointment(schedule, 10, 0);
+
+    // Display updated schedule
+    displaySchedule(schedule);
+
+    // Sort list based on time
+    sortList(schedule);
+
+    // Display sorted schedule
+    displaySchedule(schedule);
+
+    // Clean up allocated memory
+    while (schedule != nullptr) {
+        TimeSlot* temp = schedule;
+        schedule = schedule->next;
+        delete temp;
+    }
+
+    return 0;
+}

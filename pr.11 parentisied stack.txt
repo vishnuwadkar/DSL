@@ -1,0 +1,43 @@
+#include <iostream>
+#include <stack>
+#include <string>
+
+using namespace std;
+
+bool isWellFormed(const string& expression) {
+    stack<char> charStack;
+
+    for (char ch : expression) {
+        if (ch == '(' || ch == '{' || ch == '[') {
+            charStack.push(ch);
+        } else if (ch == ')' || ch == '}' || ch == ']') {
+            if (charStack.empty()) {
+                return false; // Closing parenthesis without a matching opening parenthesis
+            }
+
+            char top = charStack.top();
+            charStack.pop();
+
+            if ((ch == ')' && top != '(') || (ch == '}' && top != '{') || (ch == ']' && top != '[')) {
+                return false; // Mismatched parentheses
+            }
+        }
+    }
+
+    return charStack.empty(); // Expression is well-formed if the stack is empty at the end
+}
+
+int main() {
+    string expression;
+
+    cout << "Enter the expression to check for well-formedness: ";
+    getline(cin, expression);
+
+    if (isWellFormed(expression)) {
+        cout << "The expression is well-formed.\n";
+    } else {
+        cout << "The expression is not well-formed.\n";
+    }
+
+    return 0;
+}

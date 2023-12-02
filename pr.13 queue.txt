@@ -1,0 +1,83 @@
+#include <iostream>
+using namespace std;
+
+class JobQueue {
+private:
+    static const int MAX_SIZE = 100;
+    int jobs[MAX_SIZE];
+    int front, rear;
+
+public:
+    JobQueue() : front(-1), rear(-1) {}
+
+    bool isEmpty() {
+        return front == -1 && rear == -1;
+    }
+
+    bool isFull() {
+        return (rear + 1) % MAX_SIZE == front;
+    }
+
+    void addJob(int jobID) {
+        if (isFull()) {
+            cout << "Job queue is full. Cannot add more jobs.\n";
+            return;
+        }
+
+        if (isEmpty()) {
+            front = rear = 0;
+        } else {
+            rear = (rear + 1) % MAX_SIZE;
+        }
+
+        jobs[rear] = jobID;
+        cout << "Job " << jobID << " added to the queue.\n";
+    }
+
+    void deleteJob() {
+        if (isEmpty()) {
+            cout << "Job queue is empty. Cannot delete jobs.\n";
+            return;
+        }
+
+        cout << "Job " << jobs[front] << " deleted from the queue.\n";
+
+        if (front == rear) {
+            front = rear = -1;
+        } else {
+            front = (front + 1) % MAX_SIZE;
+        }
+    }
+
+    void display() {
+        if (isEmpty()) {
+            cout << "Job queue is empty.\n";
+            return;
+        }
+
+        cout << "Job queue elements: ";
+        int i = front;
+        while (i != rear) {
+            cout << jobs[i] << " ";
+            i = (i + 1) % MAX_SIZE;
+        }
+        cout << jobs[rear] << "\n";
+    }
+};
+
+int main() {
+    JobQueue jobQueue;
+
+    jobQueue.addJob(1);
+    jobQueue.addJob(2);
+    jobQueue.display();
+
+    jobQueue.addJob(3);
+    jobQueue.deleteJob();
+    jobQueue.display();
+
+    jobQueue.deleteJob();
+    jobQueue.display();
+
+    return 0;
+}
